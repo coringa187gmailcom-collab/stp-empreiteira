@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>STP Empreiteira | Construção e Reformas</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header class="header">
+    <div class="container">
+      <div class="logo">
+        <img src="/static/images/logo.jpg" alt="STP Empreiteira">
+        <div>
+          <strong>STP</strong> Empreiteira
+          <small>Construção e Reformas</small>
+        </div>
+      </div>
+      <nav>
+        <a href="#inicio">Início</a>
+        <a href="#servicos">Serviços</a>
+        <a href="#fotos">Obras Realizadas</a>
+        <a href="#produtos">Produtos</a>
+        <a href="#videos">Vídeos</a>
+        <a href="#contato">Contato</a>
+      </nav>
+    </div>
+  </header>
+
+  <section id="inicio" class="hero">
+    <div class="container">
+      <div class="hero-content">
+        <h1>STP Empreiteira</h1>
+        <p>Qualidade, confiança e excelência em cada obra.</p>
+        <a href="#fotos" class="btn">Ver nossos trabalhos</a>
+      </div>
+    </div>
+  </section>
+
+  <section id="servicos" class="section">
+    <div class="container">
+      <h2>Nossos Serviços</h2>
+      <div class="grid">
+        <div class="card">
+          <h3>Construção Civil</h3>
+          <p>Obras residenciais e comerciais do zero, com acompanhamento completo.</p>
+        </div>
+        <div class="card">
+          <h3>Reformas</h3>
+          <p>Reformas residenciais e comerciais com acabamento de alta qualidade.</p>
+        </div>
+        <div class="card">
+          <h3>Ampliações</h3>
+          <p>Ampliação de imóveis com planejamento e execução profissional.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="fotos" class="section bg-light">
+    <div class="container">
+      <h2>Serviços Já Executados</h2>
+      <p class="subtitle">Confira algumas de nossas obras realizadas</p>
+      <div class="gallery">
+        <div class="gallery-item">
+          <img src="/static/images/obra1.jpg" alt="Obra em andamento">
+          <div class="overlay">Construção Residencial</div>
+        </div>
+        <div class="gallery-item">
+          <img src="/static/images/casa1.jpg" alt="Casa finalizada">
+          <div class="overlay">Casa Moderna Entregue</div>
+        </div>
+        <div class="gallery-item">
+          <img src="/static/images/obra1.jpg" alt="Estrutura">
+          <div class="overlay">Estrutura de Concreto</div>
+        </div>
+        <div class="gallery-item">
+          <img src="/static/images/casa1.jpg" alt="Fachada">
+          <div class="overlay">Fachada Contemporânea</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  
+      <section id="produtos" class="section">
+    <div class="container">
+      <h2>PRODUTOS</h2>
+      <p class="subtitle">Fotos dos produtos disponíveis</p>
+
+      <div class="produtos-nichos">
+        <div class="nicho">
+          <h3>PAPELEIRA</h3>
+          <p class="nicho-desc">Fotos dos modelos de papeleira</p>
+          <div class="gallery">
+            {% for foto in papeleira %}
+            <div class="gallery-item">
+              <img src="{{ foto }}" alt="Papeleira">
+              <div class="overlay">Papeleira</div>
+            </div>
+            {% else %}
+            <div class="gallery-item placeholder">
+              <div class="overlay">Fotos em breve</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="nicho">
+          <h3>PIAS</h3>
+          <p class="nicho-desc">Fotos dos modelos de pias</p>
+          <div class="gallery">
+            {% for foto in pias %}
+            <div class="gallery-item">
+              <img src="{{ foto }}" alt="Pia">
+              <div class="overlay">Pia</div>
+            </div>
+            {% else %}
+            <div class="gallery-item placeholder">
+              <div class="overlay">Fotos em breve</div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<section id="videos" class="section">
+    <div class="container">
+      <h2>Vídeos das Obras</h2>
+      <p class="subtitle">Acompanhe o andamento e o resultado dos nossos serviços</p>
+      <div class="videos">
+        <div class="video-card">
+          <div class="video-placeholder">
+            <span>Vídeo em breve</span>
+            <small>Adicione o link do YouTube ou arquivo de vídeo aqui</small>
+          </div>
+          <h3>Tour da Obra Residencial</h3>
+        </div>
+        <div class="video-card">
+          <div class="video-placeholder">
+            <span>Vídeo em breve</span>
+            <small>Adicione o link do YouTube ou arquivo de vídeo aqui</small>
+          </div>
+          <h3>Antes e Depois - Reforma</h3>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contato" class="section bg-dark">
+    <div class="container">
+      <h2>Entre em Contato</h2>
+      <p>Solicite um orçamento sem compromisso</p>
+      <div class="contact-info">
+        <p><strong>WhatsApp:</strong> (11) 98318-2713</p>
+        <p><strong>E-mail:</strong> contato@stpempreiteira.com.br</p>
+        <p><strong>Localização:</strong> São Paulo - SP</p>
+      </div>
+      <a href="https://wa.me/5511983182713" class="btn btn-whatsapp" target="_blank">Falar no WhatsApp</a>
+    </div>
+  </section>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 STP Empreiteira. Todos os direitos reservados.</p>
+    </div>
+  </footer>
+</body>
+</html>
