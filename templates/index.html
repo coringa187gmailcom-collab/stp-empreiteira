@@ -39,27 +39,26 @@
     </div>
   </section>
 
-  <section id="servicos" class="section">
+    <section id="servicos" class="section">
     <div class="container">
       <h2>Nossos Serviços</h2>
       <div class="grid">
+        {% for s in services %}
         <div class="card">
-          <h3>Construção Civil</h3>
-          <p>Obras residenciais e comerciais do zero, com acompanhamento completo.</p>
+          <h3>{{ s.titulo }}</h3>
+          <p>{{ s.descricao }}</p>
         </div>
+        {% else %}
         <div class="card">
-          <h3>Reformas</h3>
-          <p>Reformas residenciais e comerciais com acabamento de alta qualidade.</p>
+          <h3>Serviços em breve</h3>
+          <p>Em breve novos serviços.</p>
         </div>
-        <div class="card">
-          <h3>Ampliações</h3>
-          <p>Ampliação de imóveis com planejamento e execução profissional.</p>
-        </div>
+        {% endfor %}
       </div>
     </div>
   </section>
 
-  <section id="fotos" class="section bg-light">
+<section id="fotos" class="section bg-light">
     <div class="container">
       <h2>Serviços Já Executados</h2>
       <p class="subtitle">Confira algumas de nossas obras realizadas</p>

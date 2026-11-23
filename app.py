@@ -55,6 +55,28 @@ def save_categories(cats):
     with open(CATEGORIES_FILE, "w") as f:
         json.dump(cats, f)
 
+SERVICES_FILE = os.path.join(UPLOAD_FOLDER, "services.json")
+if not os.path.exists(SERVICES_FILE):
+    default_services = [
+        {"titulo": "Construção Civil", "descricao": "Obras residenciais e comerciais do zero, com acompanhamento completo."},
+        {"titulo": "Reformas", "descricao": "Reformas residenciais e comerciais com acabamento de alta qualidade."},
+        {"titulo": "Ampliações", "descricao": "Ampliação de imóveis com planejamento e execução profissional."}
+    ]
+    with open(SERVICES_FILE, "w") as f:
+        json.dump(default_services, f)
+
+def load_services():
+    try:
+        with open(SERVICES_FILE) as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_services(services):
+    with open(SERVICES_FILE, "w") as f:
+        json.dump(services, f)
+
+
 def get_photos(cat):
     folder = os.path.join(UPLOAD_FOLDER, cat)
     if not os.path.exists(folder):
@@ -84,7 +106,8 @@ def index():
     for cat in categories:
         fotos = get_photos(cat)
         produtos.append({"nome": cat.replace("_", " ").title(), "slug": cat, "fotos": fotos})
-    return render_template("index.html", produtos=produtos)
+    services = load_services()
+    return render_template("index.html", produtos=produtos, services=services)
 
 # Hidden admin login
 @app.route("/gestao-stp", methods=["GET", "POST"])
@@ -111,7 +134,8 @@ def admin_panel():
         fotos = os.listdir(folder) if os.path.exists(folder) else []
         produtos.append({"nome": cat.replace("_", " ").title(), "slug": cat, "fotos": fotos})
     videos = load_videos()
-    return render_template("admin_panel.html", produtos=produtos, videos=videos)
+    services = load_services()
+    return render_template("admin_panel.html", produtos=produtos, videos=videos, services=services)
 
 @app.route("/gestao-stp/upload", methods=["POST"])
 def admin_upload():
@@ -221,6 +245,31 @@ def admin_delete_category(slug):
         cats.remove(slug)
         save_categories(cats)
         flash("Card removido.", "ok")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/gestao-stp/servico", methods=["POST"])
+def admin_create_service():
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    titulo = request.form.get("titulo", "").strip()[:80]
+    descricao = request.form.get("descricao", "").strip()[:300]
+    if titulo and descricao:
+        services = load_services()
+        services.append({"titulo": titulo, "descricao": descricao})
+        save_services(services)
+        flash("Serviço criado.", "ok")
+    return redirect(url_for("admin_panel"))
+
+@app.route("/gestao-stp/servico/delete/<int:idx>", methods=["POST"])
+def admin_delete_service(idx):
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    services = load_services()
+    if 0 <= idx < len(services):
+        services.pop(idx)
+        save_services(services)
+        flash("Serviço removido.", "ok")
     return redirect(url_for("admin_panel"))
 
 @app.route("/gestao-stp/sair")
