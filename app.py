@@ -47,9 +47,14 @@ if not os.path.exists(CATEGORIES_FILE):
 def load_categories():
     try:
         with open(CATEGORIES_FILE) as f:
-            return json.load(f)
+            cats = json.load(f)
     except:
-        return ["papeleira", "pias", "nicho"]
+        cats = ["papeleira", "pias", "nicho"]
+    # Garantir que nicho sempre exista
+    for required in ["papeleira", "pias", "nicho"]:
+        if required not in cats:
+            cats.append(required)
+    return cats
 
 def save_categories(cats):
     with open(CATEGORIES_FILE, "w") as f:
