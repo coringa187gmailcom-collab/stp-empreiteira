@@ -10,10 +10,20 @@ app.secret_key = os.environ.get("SECRET_KEY", "stp-admin-secret-2026-change-me")
 ADMIN_USER = os.environ.get("ADMIN_USER", "admin")
 ADMIN_PASS = os.environ.get("ADMIN_PASS", "stp2026")
 
-UPLOAD_FOLDER = os.path.join(app.root_path, "static", "uploads")
+# Use volume if DATA_DIR is set, otherwise local static
+DATA_DIR = os.environ.get("DATA_DIR", "")
+if DATA_DIR:
+    UPLOAD_FOLDER = os.path.join(DATA_DIR, "uploads")
+else:
+    UPLOAD_FOLDER = os.path.join(app.root_path, "static", "uploads")
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_FOLDER, "papeleira"), exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_FOLDER, "pias"), exist_ok=True)
+
+# Serve uploads from volume if needed
+@app.route("/static/uploads/<path:filename>")
+def serve_upload(filename):
+    return send_from_directory(UPLOAD_FOLDER, filename)
 
 ALLOWED = {"png", "jpg", "jpeg", "webp", "gif"}
 
