@@ -39,42 +39,36 @@
       {% endfor %}
     {% endwith %}
 
-    <h2>PAPELEIRA</h2>
+    
+    <h2>NOVO CARD</h2>
     <div class="upload-box">
-      <form method="post" action="/gestao-stp/upload" enctype="multipart/form-data">
-        <input type="hidden" name="categoria" value="papeleira">
-        <label>Enviar fotos de Papeleira</label><br>
-        <input type="file" name="fotos" accept="image/*" multiple required>
-        <button type="submit">Enviar</button>
+      <form method="post" action="/gestao-stp/categoria">
+        <label>Título do novo card</label><br>
+        <input type="text" name="nome" placeholder="Ex: Torneiras, Cubas, Espelhos..." required style="width:100%;padding:8px;margin:8px 0;border:1px solid #cbd5e1;border-radius:6px">
+        <button type="submit">Criar card</button>
       </form>
-    </div>
-    <div class="fotos">
-      {% for f in papeleira %}
-      <div class="foto">
-        <img src="/static/uploads/papeleira/{{ f }}" alt="">
-        <form method="post" action="/gestao-stp/delete/papeleira/{{ f }}">
-          <button type="submit" onclick="return confirm('Remover?')">✕</button>
-        </form>
-      </div>
-      {% else %}
-      <p>Nenhuma foto ainda.</p>
-      {% endfor %}
     </div>
 
-    <h2>PIAS</h2>
+    {% for p in produtos %}
+    <h2>{{ p.nome }}</h2>
     <div class="upload-box">
       <form method="post" action="/gestao-stp/upload" enctype="multipart/form-data">
-        <input type="hidden" name="categoria" value="pias">
-        <label>Enviar fotos de Pias</label><br>
+        <input type="hidden" name="categoria" value="{{ p.slug }}">
+        <label>Enviar fotos de {{ p.nome }}</label><br>
         <input type="file" name="fotos" accept="image/*" multiple required>
         <button type="submit">Enviar</button>
       </form>
+      {% if p.slug not in ('papeleira', 'pias') %}
+      <form method="post" action="/gestao-stp/categoria/delete/{{ p.slug }}" style="margin-top:8px">
+        <button type="submit" onclick="return confirm('Remover este card?')" style="background:#7f1d1d">Remover card</button>
+      </form>
+      {% endif %}
     </div>
     <div class="fotos">
-      {% for f in pias %}
+      {% for f in p.fotos %}
       <div class="foto">
-        <img src="/static/uploads/pias/{{ f }}" alt="">
-        <form method="post" action="/gestao-stp/delete/pias/{{ f }}">
+        <img src="/static/uploads/{{ p.slug }}/{{ f }}" alt="">
+        <form method="post" action="/gestao-stp/delete/{{ p.slug }}/{{ f }}">
           <button type="submit" onclick="return confirm('Remover?')">✕</button>
         </form>
       </div>
@@ -82,8 +76,9 @@
       <p>Nenhuma foto ainda.</p>
       {% endfor %}
     </div>
-  
-    <h2>VÍDEOS</h2>
+    {% endfor %}
+
+<h2>VÍDEOS</h2>
     <div class="upload-box">
       <form method="post" action="/gestao-stp/video" >
         <label>Título do vídeo</label><br>

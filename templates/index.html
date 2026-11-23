@@ -85,20 +85,20 @@
   </section>
 
   
-      <section id="produtos" class="section">
+        <section id="produtos" class="section">
     <div class="container">
       <h2>PRODUTOS</h2>
       <p class="subtitle">Fotos dos produtos disponíveis</p>
 
       <div class="produtos-nichos">
+        {% for p in produtos %}
         <div class="nicho">
-          <h3>PAPELEIRA</h3>
-          <p class="nicho-desc">Fotos dos modelos de papeleira</p>
+          <h3>{{ p.nome }}</h3>
           <div class="gallery">
-            {% for foto in papeleira %}
+            {% for foto in p.fotos %}
             <div class="gallery-item">
-              <img src="{{ foto }}" alt="Papeleira">
-              <div class="overlay">Papeleira</div>
+              <img src="{{ foto }}" alt="{{ p.nome }}">
+              <div class="overlay">{{ p.nome }}</div>
             </div>
             {% else %}
             <div class="gallery-item placeholder">
@@ -107,23 +107,7 @@
             {% endfor %}
           </div>
         </div>
-
-        <div class="nicho">
-          <h3>PIAS</h3>
-          <p class="nicho-desc">Fotos dos modelos de pias</p>
-          <div class="gallery">
-            {% for foto in pias %}
-            <div class="gallery-item">
-              <img src="{{ foto }}" alt="Pia">
-              <div class="overlay">Pia</div>
-            </div>
-            {% else %}
-            <div class="gallery-item placeholder">
-              <div class="overlay">Fotos em breve</div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
+        {% endfor %}
       </div>
     </div>
   </section>

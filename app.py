@@ -39,6 +39,29 @@ def save_videos(videos):
     with open(VIDEOS_FILE, "w") as f:
         json.dump(videos, f)
 
+CATEGORIES_FILE = os.path.join(UPLOAD_FOLDER, "categories.json")
+if not os.path.exists(CATEGORIES_FILE):
+    with open(CATEGORIES_FILE, "w") as f:
+        json.dump(["papeleira", "pias"], f)
+
+def load_categories():
+    try:
+        with open(CATEGORIES_FILE) as f:
+            return json.load(f)
+    except:
+        return ["papeleira", "pias"]
+
+def save_categories(cats):
+    with open(CATEGORIES_FILE, "w") as f:
+        json.dump(cats, f)
+
+def get_photos(cat):
+    folder = os.path.join(UPLOAD_FOLDER, cat)
+    if not os.path.exists(folder):
+        return []
+    return [f"/static/uploads/{cat}/{f}" for f in os.listdir(folder) if allowed(f)]
+
+
 
 # Serve uploads from volume if needed
 @app.route("/static/uploads/<path:filename>")
@@ -55,15 +78,13 @@ def is_admin():
 
 @app.route("/")
 def index():
-    # Load uploaded photos
-    papeleira = []
-    pias = []
-    base = app.static_folder + "/uploads"
-    if os.path.exists(base + "/papeleira"):
-        papeleira = [f"/static/uploads/papeleira/{f}" for f in os.listdir(base + "/papeleira") if allowed(f)]
-    if os.path.exists(base + "/pias"):
-        pias = [f"/static/uploads/pias/{f}" for f in os.listdir(base + "/pias") if allowed(f)]
-    return render_template("index.html", papeleira=papeleira, pias=pias)
+    # Load all categories dynamically
+    categories = load_categories()
+    produtos = []
+    for cat in categories:
+        fotos = get_photos(cat)
+        produtos.append({"nome": cat.replace("_", " ").title(), "slug": cat, "fotos": fotos})
+    return render_template("index.html", produtos=produtos)
 
 # Hidden admin login
 @app.route("/gestao-stp", methods=["GET", "POST"])
@@ -83,22 +104,22 @@ def admin_login():
 def admin_panel():
     if not is_admin():
         return redirect(url_for("admin_login"))
-    papeleira = []
-    pias = []
-    base = os.path.join(app.static_folder, "uploads")
-    if os.path.exists(os.path.join(base, "papeleira")):
-        papeleira = os.listdir(os.path.join(base, "papeleira"))
-    if os.path.exists(os.path.join(base, "pias")):
-        pias = os.listdir(os.path.join(base, "pias"))
+    categories = load_categories()
+    produtos = []
+    for cat in categories:
+        folder = os.path.join(UPLOAD_FOLDER, cat)
+        fotos = os.listdir(folder) if os.path.exists(folder) else []
+        produtos.append({"nome": cat.replace("_", " ").title(), "slug": cat, "fotos": fotos})
     videos = load_videos()
-    return render_template("admin_panel.html", papeleira=papeleira, pias=pias, videos=videos)
+    return render_template("admin_panel.html", produtos=produtos, videos=videos)
 
 @app.route("/gestao-stp/upload", methods=["POST"])
 def admin_upload():
     if not is_admin():
         return redirect(url_for("admin_login"))
-    categoria = request.form.get("categoria")
-    if categoria not in ("papeleira", "pias"):
+    categoria = request.form.get("categoria", "").strip().lower().replace(" ", "_")
+    cats = load_categories()
+    if categoria not in cats:
         flash("Categoria inválida.", "erro")
         return redirect(url_for("admin_panel"))
     files = request.files.getlist("fotos")
@@ -124,7 +145,7 @@ def admin_upload():
 def admin_delete(categoria, filename):
     if not is_admin():
         return redirect(url_for("admin_login"))
-    if categoria not in ("papeleira", "pias"):
+    if categoria not in load_categories():
         return redirect(url_for("admin_panel"))
     path = os.path.join(app.static_folder, "uploads", categoria, secure_filename(filename))
     if os.path.exists(path):
@@ -172,6 +193,35 @@ def admin_backup():
     memory.seek(0)
     from flask import send_file
     return send_file(memory, download_name="stp-backup.zip", as_attachment=True, mimetype="application/zip")
+
+
+@app.route("/gestao-stp/categoria", methods=["POST"])
+def admin_create_category():
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    nome = request.form.get("nome", "").strip()
+    if nome:
+        slug = nome.lower().replace(" ", "_")[:40]
+        cats = load_categories()
+        if slug not in cats:
+            cats.append(slug)
+            save_categories(cats)
+            os.makedirs(os.path.join(UPLOAD_FOLDER, slug), exist_ok=True)
+            flash(f"Card '{nome}' criado.", "ok")
+        else:
+            flash("Já existe um card com esse nome.", "erro")
+    return redirect(url_for("admin_panel"))
+
+@app.route("/gestao-stp/categoria/delete/<slug>", methods=["POST"])
+def admin_delete_category(slug):
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    cats = load_categories()
+    if slug in cats and slug not in ("papeleira", "pias"):
+        cats.remove(slug)
+        save_categories(cats)
+        flash("Card removido.", "ok")
+    return redirect(url_for("admin_panel"))
 
 @app.route("/gestao-stp/sair")
 def admin_logout():
