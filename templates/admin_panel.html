@@ -121,7 +121,12 @@
       {% for f in p.fotos %}
       <div class="foto">
         <img src="/static/uploads/{{ p.slug }}/{{ f }}" alt="">
-        <form method="post" action="/gestao-stp/delete/{{ p.slug }}/{{ f }}">
+        <form method="post" action="/gestao-stp/preco" style="margin-top:6px">
+          <input type="hidden" name="key" value="{{ p.slug }}/{{ f }}">
+          <input type="text" name="preco" placeholder="Valor (ex: 150)" style="width:70%;padding:4px;font-size:12px;border:1px solid #cbd5e1;border-radius:4px">
+          <button type="submit" style="padding:4px 8px;font-size:11px;background:#0f172a">R$</button>
+        </form>
+        <form method="post" action="/gestao-stp/delete/{{ p.slug }}/{{ f }}" style="margin-top:4px">
           <button type="submit" onclick="return confirm('Remover?')">✕</button>
         </form>
       </div>

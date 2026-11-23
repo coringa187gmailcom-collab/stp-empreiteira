@@ -42,14 +42,14 @@ def save_videos(videos):
 CATEGORIES_FILE = os.path.join(UPLOAD_FOLDER, "categories.json")
 if not os.path.exists(CATEGORIES_FILE):
     with open(CATEGORIES_FILE, "w") as f:
-        json.dump(["papeleira", "pias"], f)
+        json.dump(["papeleira", "pias", "nicho"], f)
 
 def load_categories():
     try:
         with open(CATEGORIES_FILE) as f:
             return json.load(f)
     except:
-        return ["papeleira", "pias"]
+        return ["papeleira", "pias", "nicho"]
 
 def save_categories(cats):
     with open(CATEGORIES_FILE, "w") as f:
@@ -98,13 +98,36 @@ def save_works(works):
     with open(WORKS_FILE, "w") as f:
         json.dump(works, f)
 
+PRICES_FILE = os.path.join(UPLOAD_FOLDER, "prices.json")
+if not os.path.exists(PRICES_FILE):
+    with open(PRICES_FILE, "w") as f:
+        json.dump({}, f)
+
+def load_prices():
+    try:
+        with open(PRICES_FILE) as f:
+            return json.load(f)
+    except:
+        return {}
+
+def save_prices(prices):
+    with open(PRICES_FILE, "w") as f:
+        json.dump(prices, f)
+
+
 
 
 def get_photos(cat):
     folder = os.path.join(UPLOAD_FOLDER, cat)
     if not os.path.exists(folder):
         return []
-    return [f"/static/uploads/{cat}/{f}" for f in os.listdir(folder) if allowed(f)]
+    prices = load_prices()
+    result = []
+    for f in os.listdir(folder):
+        if allowed(f):
+            key = f"{cat}/{f}"
+            result.append({"url": f"/static/uploads/{cat}/{f}", "preco": prices.get(key, "")})
+    return result
 
 
 
@@ -125,10 +148,16 @@ def is_admin():
 def index():
     # Load all categories dynamically
     categories = load_categories()
+    prices = load_prices()
     produtos = []
     for cat in categories:
         fotos = get_photos(cat)
-        produtos.append({"nome": cat.replace("_", " ").title(), "slug": cat, "fotos": fotos})
+        produtos.append({
+            "nome": cat.replace("_", " ").title(),
+            "slug": cat,
+            "fotos": fotos,
+            "preco": prices.get(cat, "")
+        })
     services = load_services()
     works = load_works()
     return render_template("index.html", produtos=produtos, services=services, works=works)
@@ -152,11 +181,17 @@ def admin_panel():
     if not is_admin():
         return redirect(url_for("admin_login"))
     categories = load_categories()
+    prices = load_prices()
     produtos = []
     for cat in categories:
         folder = os.path.join(UPLOAD_FOLDER, cat)
         fotos = os.listdir(folder) if os.path.exists(folder) else []
-        produtos.append({"nome": cat.replace("_", " ").title(), "slug": cat, "fotos": fotos})
+        produtos.append({
+            "nome": cat.replace("_", " ").title(),
+            "slug": cat,
+            "fotos": fotos,
+            "preco": prices.get(cat, "")
+        })
     videos = load_videos()
     services = load_services()
     works = load_works()
@@ -339,6 +374,37 @@ def admin_delete_work(idx):
         works.pop(idx)
         save_works(works)
         flash("Obra removida.", "ok")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/gestao-stp/preco", methods=["POST"])
+def admin_update_price():
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    slug = request.form.get("slug", "").strip()
+    preco = request.form.get("preco", "").strip()
+    if slug:
+        prices = load_prices()
+        prices[slug] = preco
+        save_prices(prices)
+        flash("Valor atualizado.", "ok")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/gestao-stp/preco", methods=["POST"])
+def admin_set_price():
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    key = request.form.get("key", "")
+    preco = request.form.get("preco", "").strip()
+    if key:
+        prices = load_prices()
+        if preco:
+            prices[key] = preco
+        else:
+            prices.pop(key, None)
+        save_prices(prices)
+        flash("Valor atualizado.", "ok")
     return redirect(url_for("admin_panel"))
 
 @app.route("/gestao-stp/sair")

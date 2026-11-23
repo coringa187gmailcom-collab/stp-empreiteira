@@ -89,8 +89,11 @@
           <div class="gallery">
             {% for foto in p.fotos %}
             <div class="gallery-item">
-              <img src="{{ foto }}" alt="{{ p.nome }}">
-              <div class="overlay">{{ p.nome }}</div>
+              <img src="{{ foto.url }}" alt="{{ p.nome }}">
+              <div class="overlay">
+                {{ p.nome }}
+                {% if foto.preco %}<br><span class="preco">R$ {{ foto.preco }}</span>{% endif %}
+              </div>
             </div>
             {% else %}
             <div class="gallery-item placeholder">
