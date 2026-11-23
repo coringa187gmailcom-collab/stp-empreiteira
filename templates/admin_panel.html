@@ -81,6 +81,31 @@
       <p>Nenhuma foto ainda.</p>
       {% endfor %}
     </div>
+  
+    <h2>VÍDEOS</h2>
+    <div class="upload-box">
+      <form method="post" action="/gestao-stp/video" >
+        <label>Título do vídeo</label><br>
+        <input type="text" name="titulo" placeholder="Ex: Tour da Obra" required style="width:100%;padding:8px;margin:8px 0;border:1px solid #cbd5e1;border-radius:6px"><br>
+        <label>Link do YouTube (ou arquivo)</label><br>
+        <input type="url" name="url" placeholder="https://youtube.com/watch?v=..." required style="width:100%;padding:8px;margin:8px 0;border:1px solid #cbd5e1;border-radius:6px"><br>
+        <button type="submit">Adicionar vídeo</button>
+      </form>
+    </div>
+    <div class="fotos">
+      {% for v in videos %}
+      <div class="foto" style="background:#fff;padding:12px;border-radius:8px">
+        <strong>{{ v.titulo }}</strong><br>
+        <small style="color:#64748b">{{ v.url[:40] }}...</small>
+        <form method="post" action="/gestao-stp/video/delete/{{ loop.index0 }}" style="margin-top:8px">
+          <button type="submit" onclick="return confirm('Remover?')">✕ Remover</button>
+        </form>
+      </div>
+      {% else %}
+      <p>Nenhum vídeo ainda.</p>
+      {% endfor %}
+    </div>
+
   </div>
 </body>
 </html>

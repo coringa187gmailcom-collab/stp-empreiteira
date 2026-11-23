@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, session, f
 import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
+import json
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "stp-admin-secret-2026-change-me")
@@ -19,6 +20,22 @@ else:
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_FOLDER, "papeleira"), exist_ok=True)
 os.makedirs(os.path.join(UPLOAD_FOLDER, "pias"), exist_ok=True)
+VIDEOS_FILE = os.path.join(UPLOAD_FOLDER, "videos.json")
+if not os.path.exists(VIDEOS_FILE):
+    with open(VIDEOS_FILE, "w") as f:
+        json.dump([], f)
+
+def load_videos():
+    try:
+        with open(VIDEOS_FILE) as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_videos(videos):
+    with open(VIDEOS_FILE, "w") as f:
+        json.dump(videos, f)
+
 
 # Serve uploads from volume if needed
 @app.route("/static/uploads/<path:filename>")
@@ -70,7 +87,8 @@ def admin_panel():
         papeleira = os.listdir(os.path.join(base, "papeleira"))
     if os.path.exists(os.path.join(base, "pias")):
         pias = os.listdir(os.path.join(base, "pias"))
-    return render_template("admin_panel.html", papeleira=papeleira, pias=pias)
+    videos = load_videos()
+    return render_template("admin_panel.html", papeleira=papeleira, pias=pias, videos=videos)
 
 @app.route("/gestao-stp/upload", methods=["POST"])
 def admin_upload():
@@ -109,6 +127,31 @@ def admin_delete(categoria, filename):
     if os.path.exists(path):
         os.remove(path)
         flash("Foto removida.", "ok")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/gestao-stp/video", methods=["POST"])
+def admin_video_add():
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    titulo = request.form.get("titulo", "").strip()[:80]
+    url = request.form.get("url", "").strip()
+    if titulo and url:
+        videos = load_videos()
+        videos.append({"titulo": titulo, "url": url})
+        save_videos(videos)
+        flash("Vídeo adicionado.", "ok")
+    return redirect(url_for("admin_panel"))
+
+@app.route("/gestao-stp/video/delete/<int:idx>", methods=["POST"])
+def admin_video_delete(idx):
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    videos = load_videos()
+    if 0 <= idx < len(videos):
+        videos.pop(idx)
+        save_videos(videos)
+        flash("Vídeo removido.", "ok")
     return redirect(url_for("admin_panel"))
 
 @app.route("/gestao-stp/sair")
