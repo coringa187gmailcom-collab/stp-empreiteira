@@ -76,6 +76,29 @@ def save_services(services):
     with open(SERVICES_FILE, "w") as f:
         json.dump(services, f)
 
+WORKS_FILE = os.path.join(UPLOAD_FOLDER, "works.json")
+if not os.path.exists(WORKS_FILE):
+    default_works = [
+        {"titulo": "Construção Residencial", "imagem": "/static/images/obra1.jpg"},
+        {"titulo": "Casa Moderna Entregue", "imagem": "/static/images/casa1.jpg"},
+        {"titulo": "Estrutura de Concreto", "imagem": "/static/images/obra1.jpg"},
+        {"titulo": "Fachada Contemporânea", "imagem": "/static/images/casa1.jpg"}
+    ]
+    with open(WORKS_FILE, "w") as f:
+        json.dump(default_works, f)
+
+def load_works():
+    try:
+        with open(WORKS_FILE) as f:
+            return json.load(f)
+    except:
+        return []
+
+def save_works(works):
+    with open(WORKS_FILE, "w") as f:
+        json.dump(works, f)
+
+
 
 def get_photos(cat):
     folder = os.path.join(UPLOAD_FOLDER, cat)
@@ -107,7 +130,8 @@ def index():
         fotos = get_photos(cat)
         produtos.append({"nome": cat.replace("_", " ").title(), "slug": cat, "fotos": fotos})
     services = load_services()
-    return render_template("index.html", produtos=produtos, services=services)
+    works = load_works()
+    return render_template("index.html", produtos=produtos, services=services, works=works)
 
 # Hidden admin login
 @app.route("/gestao-stp", methods=["GET", "POST"])
@@ -135,7 +159,8 @@ def admin_panel():
         produtos.append({"nome": cat.replace("_", " ").title(), "slug": cat, "fotos": fotos})
     videos = load_videos()
     services = load_services()
-    return render_template("admin_panel.html", produtos=produtos, videos=videos, services=services)
+    works = load_works()
+    return render_template("admin_panel.html", produtos=produtos, videos=videos, services=services, works=works)
 
 @app.route("/gestao-stp/upload", methods=["POST"])
 def admin_upload():
@@ -270,6 +295,50 @@ def admin_delete_service(idx):
         services.pop(idx)
         save_services(services)
         flash("Serviço removido.", "ok")
+    return redirect(url_for("admin_panel"))
+
+
+@app.route("/gestao-stp/obra", methods=["POST"])
+def admin_create_work():
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    titulo = request.form.get("titulo", "").strip()[:80]
+    files = request.files.getlist("foto")
+    if titulo and files and files[0].filename:
+        f = files[0]
+        if allowed(f.filename):
+            name = secure_filename(f.filename)
+            folder = os.path.join(UPLOAD_FOLDER, "obras")
+            os.makedirs(folder, exist_ok=True)
+            path = os.path.join(folder, name)
+            f.save(path)
+            works = load_works()
+            works.append({"titulo": titulo, "imagem": f"/static/uploads/obras/{name}"})
+            save_works(works)
+            flash("Obra adicionada.", "ok")
+    return redirect(url_for("admin_panel"))
+
+@app.route("/gestao-stp/obra/edit/<int:idx>", methods=["POST"])
+def admin_edit_work(idx):
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    titulo = request.form.get("titulo", "").strip()[:80]
+    works = load_works()
+    if 0 <= idx < len(works) and titulo:
+        works[idx]["titulo"] = titulo
+        save_works(works)
+        flash("Título atualizado.", "ok")
+    return redirect(url_for("admin_panel"))
+
+@app.route("/gestao-stp/obra/delete/<int:idx>", methods=["POST"])
+def admin_delete_work(idx):
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    works = load_works()
+    if 0 <= idx < len(works):
+        works.pop(idx)
+        save_works(works)
+        flash("Obra removida.", "ok")
     return redirect(url_for("admin_panel"))
 
 @app.route("/gestao-stp/sair")

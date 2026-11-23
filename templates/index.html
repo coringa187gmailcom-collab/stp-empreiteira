@@ -58,33 +58,26 @@
     </div>
   </section>
 
-<section id="fotos" class="section bg-light">
+  <section id="fotos" class="section bg-light">
     <div class="container">
       <h2>Serviços Já Executados</h2>
       <p class="subtitle">Confira algumas de nossas obras realizadas</p>
       <div class="gallery">
+        {% for w in works %}
         <div class="gallery-item">
-          <img src="/static/images/obra1.jpg" alt="Obra em andamento">
-          <div class="overlay">Construção Residencial</div>
+          <img src="{{ w.imagem }}" alt="{{ w.titulo }}">
+          <div class="overlay">{{ w.titulo }}</div>
         </div>
-        <div class="gallery-item">
-          <img src="/static/images/casa1.jpg" alt="Casa finalizada">
-          <div class="overlay">Casa Moderna Entregue</div>
+        {% else %}
+        <div class="gallery-item placeholder">
+          <div class="overlay">Obras em breve</div>
         </div>
-        <div class="gallery-item">
-          <img src="/static/images/obra1.jpg" alt="Estrutura">
-          <div class="overlay">Estrutura de Concreto</div>
-        </div>
-        <div class="gallery-item">
-          <img src="/static/images/casa1.jpg" alt="Fachada">
-          <div class="overlay">Fachada Contemporânea</div>
-        </div>
+        {% endfor %}
       </div>
     </div>
   </section>
 
-  
-        <section id="produtos" class="section">
+<section id="produtos" class="section">
     <div class="container">
       <h2>PRODUTOS</h2>
       <p class="subtitle">Fotos dos produtos disponíveis</p>
