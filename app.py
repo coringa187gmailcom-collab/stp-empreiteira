@@ -3,6 +3,9 @@ import os
 from werkzeug.utils import secure_filename
 from datetime import datetime
 import json
+import shutil
+import io
+import zipfile
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "stp-admin-secret-2026-change-me")
@@ -153,6 +156,22 @@ def admin_video_delete(idx):
         save_videos(videos)
         flash("Vídeo removido.", "ok")
     return redirect(url_for("admin_panel"))
+
+
+@app.route("/gestao-stp/backup")
+def admin_backup():
+    if not is_admin():
+        return redirect(url_for("admin_login"))
+    memory = io.BytesIO()
+    with zipfile.ZipFile(memory, 'w', zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(UPLOAD_FOLDER):
+            for file in files:
+                filepath = os.path.join(root, file)
+                arcname = os.path.relpath(filepath, UPLOAD_FOLDER)
+                zf.write(filepath, arcname)
+    memory.seek(0)
+    from flask import send_file
+    return send_file(memory, download_name="stp-backup.zip", as_attachment=True, mimetype="application/zip")
 
 @app.route("/gestao-stp/sair")
 def admin_logout():
