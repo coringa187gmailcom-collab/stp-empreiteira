@@ -302,26 +302,6 @@ def admin_backup():
                 zf.write(filepath, arcname)
     memory.seek(0)
     
-def optimize_image(path, max_size=1600, quality=82):
-    try:
-        from PIL import Image
-        img = Image.open(path)
-        img = img.convert("RGB") if img.mode in ("RGBA", "P") else img
-        # Resize if larger than max_size
-        if max(img.size) > max_size:
-            ratio = max_size / max(img.size)
-            new_size = (int(img.size[0]*ratio), int(img.size[1]*ratio))
-            img = img.resize(new_size, Image.Resampling.LANCZOS)
-        # Save optimized
-        if path.lower().endswith(('.jpg', '.jpeg')):
-            img.save(path, "JPEG", quality=quality, optimize=True)
-        elif path.lower().endswith('.png'):
-            img.save(path, "PNG", optimize=True)
-        else:
-            img.save(path, quality=quality, optimize=True)
-    except Exception:
-        pass
-
 from flask import send_file
     return send_file(memory, download_name="stp-backup.zip", as_attachment=True, mimetype="application/zip")
 
@@ -402,6 +382,7 @@ def admin_create_work():
                     i += 1
                 path = os.path.join(folder, name)
                 f.save(path)
+            optimize_image(path)
             optimize_image(path)
                 works.append({"titulo": titulo, "imagem": f"/static/uploads/obras/{name}"})
                 added += 1
