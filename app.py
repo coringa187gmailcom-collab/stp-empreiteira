@@ -344,18 +344,29 @@ def admin_create_work():
         return redirect(url_for("admin_login"))
     titulo = request.form.get("titulo", "").strip()[:80]
     files = request.files.getlist("foto")
-    if titulo and files and files[0].filename:
-        f = files[0]
-        if allowed(f.filename):
-            name = secure_filename(f.filename)
-            folder = os.path.join(UPLOAD_FOLDER, "obras")
-            os.makedirs(folder, exist_ok=True)
-            path = os.path.join(folder, name)
-            f.save(path)
-            works = load_works()
-            works.append({"titulo": titulo, "imagem": f"/static/uploads/obras/{name}"})
+    if titulo and files:
+        folder = os.path.join(UPLOAD_FOLDER, "obras")
+        os.makedirs(folder, exist_ok=True)
+        works = load_works()
+        added = 0
+        for f in files:
+            if f and f.filename and allowed(f.filename):
+                name = secure_filename(f.filename)
+                # Avoid overwrite
+                base, ext = os.path.splitext(name)
+                i = 1
+                while os.path.exists(os.path.join(folder, name)):
+                    name = f"{base}_{i}{ext}"
+                    i += 1
+                path = os.path.join(folder, name)
+                f.save(path)
+                works.append({"titulo": titulo, "imagem": f"/static/uploads/obras/{name}"})
+                added += 1
+        if added:
             save_works(works)
-            flash("Obra adicionada.", "ok")
+            flash(f"{added} foto(s) adicionada(s) à obra.", "ok")
+        else:
+            flash("Nenhuma foto válida enviada.", "erro")
     return redirect(url_for("admin_panel"))
 
 @app.route("/gestao-stp/obra/edit/<int:idx>", methods=["POST"])
