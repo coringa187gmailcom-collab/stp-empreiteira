@@ -27,6 +27,27 @@ import json
 import shutil
 import io
 import zipfile
+# CDN (Cloudinary) - opcional
+CLOUDINARY_URL = os.environ.get("CLOUDINARY_URL", "")
+USE_CDN = bool(CLOUDINARY_URL)
+if USE_CDN:
+    import cloudinary
+    import cloudinary.uploader
+    cloudinary.config(cloudinary_url=CLOUDINARY_URL)
+
+def upload_to_cdn(file_storage, folder="stp"):
+    if not USE_CDN:
+        return None
+    try:
+        result = cloudinary.uploader.upload(
+            file_storage,
+            folder=folder,
+            transformation=[{"width": 1600, "crop": "limit"}, {"quality": "auto"}]
+        )
+        return result.get("secure_url")
+    except Exception:
+        return None
+
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "stp-admin-secret-2026-change-me")
@@ -379,10 +400,14 @@ def admin_create_work():
                 while os.path.exists(os.path.join(folder, name)):
                     name = f"{base}_{i}{ext}"
                     i += 1
-                path = os.path.join(folder, name)
-                f.save(path)
-                optimize_image(path)
-                works.append({"titulo": titulo, "imagem": f"/static/uploads/obras/{name}"})
+                cdn_url = upload_to_cdn(f, "obras")
+                if cdn_url:
+                    works.append({"titulo": titulo, "imagem": cdn_url})
+                else:
+                    path = os.path.join(folder, name)
+                    f.save(path)
+                    optimize_image(path)
+                    works.append({"titulo": titulo, "imagem": f"/static/uploads/obras/{name}"})
                 added += 1
         if added:
             save_works(works)
