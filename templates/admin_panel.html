@@ -21,7 +21,24 @@
     .flash { padding: 10px 16px; border-radius: 8px; margin-bottom: 16px; }
     .flash.ok { background: #d1fae5; color: #065f46; }
     .flash.erro { background: #fee2e2; color: #991b1b; }
-  </style>
+  
+    .drop-zone {
+      border: 2px dashed #94a3b8;
+      border-radius: 10px;
+      padding: 24px;
+      text-align: center;
+      background: #f8fafc;
+      color: #64748b;
+      margin: 8px 0 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .drop-zone.dragover {
+      border-color: #e11d48;
+      background: #fef2f2;
+      color: #e11d48;
+    }
+</style>
 </head>
 <body>
   <header>
@@ -108,7 +125,10 @@
       <form method="post" action="/gestao-stp/upload" enctype="multipart/form-data">
         <input type="hidden" name="categoria" value="{{ p.slug }}">
         <label>Enviar fotos de {{ p.nome }}</label><br>
-        <input type="file" name="fotos" accept="image/*" multiple required>
+        <div class="drop-zone" onclick="this.nextElementSibling.click()">
+          Arraste as fotos aqui ou clique para escolher<br><small>Pode enviar várias de uma vez</small>
+        </div>
+        <input type="file" name="fotos" accept="image/*" multiple required style="display:none">
         <button type="submit">Enviar</button>
       </form>
       {% if p.slug not in ('papeleira', 'pias') %}
@@ -161,5 +181,24 @@
     </div>
 
   </div>
+
+<script>
+document.querySelectorAll('.drop-zone').forEach(zone => {
+  const input = zone.nextElementSibling;
+  zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+  zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+  zone.addEventListener('drop', e => {
+    e.preventDefault();
+    zone.classList.remove('dragover');
+    if (e.dataTransfer.files.length) {
+      input.files = e.dataTransfer.files;
+      zone.innerHTML = e.dataTransfer.files.length + ' arquivo(s) selecionado(s)';
+    }
+  });
+  input.addEventListener('change', () => {
+    if (input.files.length) zone.innerHTML = input.files.length + ' arquivo(s) selecionado(s)';
+  });
+});
+</script>
 </body>
 </html>
