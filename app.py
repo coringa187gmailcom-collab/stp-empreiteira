@@ -381,8 +381,7 @@ def admin_create_work():
                     i += 1
                 path = os.path.join(folder, name)
                 f.save(path)
-            optimize_image(path)
-            optimize_image(path)
+                optimize_image(path)
                 works.append({"titulo": titulo, "imagem": f"/static/uploads/obras/{name}"})
                 added += 1
         if added:
