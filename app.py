@@ -301,8 +301,7 @@ def admin_backup():
                 arcname = os.path.relpath(filepath, UPLOAD_FOLDER)
                 zf.write(filepath, arcname)
     memory.seek(0)
-    
-from flask import send_file
+    from flask import send_file
     return send_file(memory, download_name="stp-backup.zip", as_attachment=True, mimetype="application/zip")
 
 
