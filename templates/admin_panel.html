@@ -64,8 +64,11 @@
       <form method="post" action="/gestao-stp/obra" enctype="multipart/form-data">
         <label>Título da obra</label><br>
         <input type="text" name="titulo" placeholder="Ex: Casa Moderna, Reforma Completa..." required style="width:100%;padding:8px;margin:8px 0;border:1px solid #cbd5e1;border-radius:6px"><br>
-        <label>Fotos (pode escolher várias)</label><br>
-        <input type="file" name="foto" accept="image/*" multiple required>
+        <label>Fotos da obra (pode escolher várias)</label><br>
+        <div class="drop-zone" onclick="this.nextElementSibling.click()">
+          Arraste as fotos aqui ou clique para escolher<br><small>Pode enviar várias de uma vez</small>
+        </div>
+        <input type="file" name="foto" accept="image/*" multiple required style="display:none">
         <button type="submit">Adicionar obra</button>
       </form>
     </div>
